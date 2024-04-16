@@ -24,10 +24,43 @@ fn main() {
         .get_result(connection)
         .expect("DB insert err");
 
-    let post_records = posts
-        .filter(id.le(4))
+    // Select All
+    println!("Select ALL posts");
+    let post_records = posts.load::<Post>(connection).expect("DB query error");
+
+    post_records.iter().for_each(|post| println!("{:?}", post));
+
+    // Select with Limit 1
+    println!("Select only 1 post");
+    let limited_post_records = posts
+        .limit(1)
         .load::<Post>(connection)
         .expect("DB query error");
 
-    post_records.iter().for_each(|post| println!("{:?}", post))
+    limited_post_records
+        .iter()
+        .for_each(|post| println!("{:?}", post));
+
+    // Select with specific columns
+    println!("Select ALL posts but only \'title\' and \'body\' columns");
+    let simple_post_records = posts
+        .select((title, body))
+        .load::<PostSimple>(connection)
+        .expect("DB query err");
+
+    simple_post_records
+        .iter()
+        .for_each(|post| println!("{:?}", post));
+
+    // Select with condition
+    println!("Select posts using WHERE clause");
+    let where_post_records = posts
+        .filter(id.eq(6))
+        .select((title, body))
+        .load::<PostSimple>(connection)
+        .expect("DB query err");
+
+    where_post_records
+        .iter()
+        .for_each(|post| println!("{:?}", post));
 }

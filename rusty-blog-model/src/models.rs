@@ -9,6 +9,12 @@ pub struct Post {
     pub body: String,
 }
 
+#[derive(Debug, Queryable)]
+pub struct PostSimple {
+    pub title: String,
+    pub body: String,
+}
+
 #[derive(Insertable)]
 #[diesel(table_name = posts)]
 pub struct NewPost<'a> {
