@@ -10,8 +10,11 @@ pub mod routes {
     pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
     #[get("/")]
-    pub async fn hello_world() -> impl Responder {
-        HttpResponse::Ok().body("Hola desde Actix")
+    pub async fn index(template: web::Data<tera::Tera>) -> impl Responder {
+        let ctx = tera::Context::new();
+        HttpResponse::Ok()
+            .content_type("text/html")
+            .body(template.render("index.html", &ctx).expect("Template Err"))
     }
 
     #[get("/posts")]

@@ -11,9 +11,10 @@ async fn main() -> std::io::Result<()> {
     let pool = get_db_pool();
 
     HttpServer::new(move || {
-        let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/*/*"));
+        let tera =
+            Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/*")).expect("Tera Err");
         App::new()
-            .service(routes::hello_world)
+            .service(routes::index)
             .service(routes::get_posts)
             .service(routes::new_post)
             .wrap(Logger::default())
