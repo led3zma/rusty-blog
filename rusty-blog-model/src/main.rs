@@ -24,6 +24,12 @@ fn main() {
         .get_result(connection)
         .expect("DB insert err");
 
+    let updated_post_record = diesel::update(posts.filter(id.eq(1)))
+        .set(body.eq("Cuaacuacacuacu"))
+        .get_result::<Post>(connection)
+        .expect("DB update error");
+    println!("{:?}", updated_post_record);
+
     // Select All
     println!("Select ALL posts");
     let post_records = posts.load::<Post>(connection).expect("DB query error");
@@ -55,12 +61,16 @@ fn main() {
     // Select with condition
     println!("Select posts using WHERE clause");
     let where_post_records = posts
-        .filter(id.eq(6))
-        .select((title, body))
-        .load::<PostSimple>(connection)
+        .filter(id.eq(1))
+        .load::<Post>(connection)
         .expect("DB query err");
 
     where_post_records
         .iter()
         .for_each(|post| println!("{:?}", post));
+
+    let deleted_records = diesel::delete(posts.filter(title.like("%Test%")))
+        .execute(connection)
+        .expect("DB delete error");
+    println!("Deleted: {deleted_records}");
 }
