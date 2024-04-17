@@ -42,7 +42,7 @@ pub fn select_by_slug(mut connection: DbConn, search_slug: &str) -> Result<Vec<P
         .load::<Post>(&mut connection)
 }
 
-pub fn update(
+pub fn update_by_id(
     mut connection: DbConn,
     search_id: i32,
     updated_post: NewPost,
