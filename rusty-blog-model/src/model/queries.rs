@@ -22,42 +22,34 @@ pub fn select_all(mut connection: DbConn) -> Result<Vec<Post>, Error> {
     posts.load::<Post>(&mut connection)
 }
 
-pub fn select_one_post(connection: &mut PgConnection) -> Vec<Post> {
-    posts
-        .limit(1)
-        .load::<Post>(connection)
-        .expect("DB query error")
+pub fn select_one_post(mut connection: DbConn) -> Result<Vec<Post>, Error> {
+    posts.limit(1).load::<Post>(&mut connection)
 }
 
-pub fn select_simple(connection: &mut PgConnection) -> Vec<PostSimple> {
+pub fn select_simple(mut connection: DbConn) -> Result<Vec<PostSimple>, Error> {
     posts
         .select((title, body))
-        .load::<PostSimple>(connection)
-        .expect("DB query err")
+        .load::<PostSimple>(&mut connection)
 }
 
-pub fn select_by_id(connection: &mut PgConnection, search_id: i32) -> Vec<Post> {
-    posts
-        .filter(id.eq(search_id))
-        .load::<Post>(connection)
-        .expect("DB query err")
+pub fn select_by_id(mut connection: DbConn, search_id: i32) -> Result<Vec<Post>, Error> {
+    posts.filter(id.eq(search_id)).load::<Post>(&mut connection)
 }
 
-pub fn update(connection: &mut PgConnection, search_id: i32, updated_post: NewPost) -> Post {
+pub fn update(
+    mut connection: DbConn,
+    search_id: i32,
+    updated_post: NewPost,
+) -> Result<Post, Error> {
     diesel::update(posts.filter(id.eq(search_id)))
         .set(updated_post)
-        .get_result::<Post>(connection)
-        .expect("DB update error")
+        .get_result::<Post>(&mut connection)
 }
 
-pub fn delete_by_id(connection: &mut PgConnection, search_id: i32) -> usize {
-    diesel::delete(posts.filter(id.eq(search_id)))
-        .execute(connection)
-        .expect("DB delete error")
+pub fn delete_by_id(mut connection: DbConn, search_id: i32) -> Result<usize, Error> {
+    diesel::delete(posts.filter(id.eq(search_id))).execute(&mut connection)
 }
 
-pub fn delete_by_slug(connection: &mut PgConnection, search_slug: &str) -> usize {
-    diesel::delete(posts.filter(slug.like(search_slug)))
-        .execute(connection)
-        .expect("DB delete error")
+pub fn delete_by_slug(mut connection: DbConn, search_slug: &str) -> Result<usize, Error> {
+    diesel::delete(posts.filter(slug.like(search_slug))).execute(&mut connection)
 }
