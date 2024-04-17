@@ -1,5 +1,5 @@
-use crate::schema::posts;
-use diesel::{deserialize::Queryable, prelude::Insertable};
+use crate::model::schema::posts;
+use diesel::{deserialize::Queryable, prelude::Insertable, query_builder::AsChangeset};
 
 #[derive(Debug, Queryable)]
 pub struct Post {
@@ -15,7 +15,7 @@ pub struct PostSimple {
     pub body: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, AsChangeset)]
 #[diesel(table_name = posts)]
 pub struct NewPost<'a> {
     pub title: &'a str,
