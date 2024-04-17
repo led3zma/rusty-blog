@@ -2,17 +2,24 @@ use crate::model::{
     models::{NewPost, Post, PostSimple},
     schema::posts::{self, dsl::*},
 };
-use diesel::prelude::*;
+use diesel::{
+    prelude::*,
+    r2d2::{ConnectionManager, PooledConnection},
+};
 
-pub fn create(connection: &mut PgConnection, new_post: NewPost) -> Post {
+use super::models::NewPostHandler;
+
+pub type DbConn = PooledConnection<ConnectionManager<PgConnection>>;
+
+pub fn create(mut connection: DbConn, new_post: &NewPostHandler) -> Post {
     diesel::insert_into(posts::table)
-        .values(new_post)
-        .get_result(connection)
+        .values(NewPost::new(new_post.title.clone(), new_post.body.clone()))
+        .get_result(&mut connection)
         .expect("DB insert err")
 }
 
-pub fn select_all(connection: &mut PgConnection) -> Vec<Post> {
-    posts.load::<Post>(connection).expect("DB query error")
+pub fn select_all(mut connection: DbConn) -> Vec<Post> {
+    posts.load::<Post>(&mut connection).expect("DB query error")
 }
 
 pub fn select_one_post(connection: &mut PgConnection) -> Vec<Post> {
