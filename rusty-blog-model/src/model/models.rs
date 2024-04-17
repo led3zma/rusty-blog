@@ -36,6 +36,14 @@ impl NewPost {
         NewPost { title, slug, body }
     }
 
+    pub fn new_by_handler(handler: &NewPostHandler) -> NewPost {
+        NewPost {
+            title: handler.title.clone(),
+            body: handler.body.clone(),
+            slug: Self::slugify(handler.title.clone()),
+        }
+    }
+
     fn slugify(title: String) -> String {
         title.replace(" ", "-").to_lowercase()
     }
