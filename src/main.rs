@@ -1,7 +1,7 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
-use rusty_blog_model::controller::*;
-use rusty_blog_model::get_db_pool;
+use rusty_blog::controller::*;
+use rusty_blog::get_db_pool;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
