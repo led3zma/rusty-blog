@@ -14,7 +14,7 @@ pub type DbConn = PooledConnection<ConnectionManager<PgConnection>>;
 
 pub fn create(mut connection: DbConn, new_post: &NewPostHandler) -> Result<Post, Error> {
     diesel::insert_into(posts::table)
-        .values(NewPost::new(new_post.title.clone(), new_post.body.clone()))
+        .values(NewPost::new_by_handler(new_post))
         .get_result(&mut connection)
 }
 
@@ -45,26 +45,20 @@ pub fn select_by_slug(mut connection: DbConn, search_slug: &str) -> Result<Vec<P
 pub fn update_by_id(
     mut connection: DbConn,
     search_id: i32,
-    updated_post: NewPostHandler,
+    updated_post: &NewPostHandler,
 ) -> Result<Post, Error> {
     diesel::update(posts.filter(id.eq(search_id)))
-        .set(NewPost::new(
-            updated_post.title.clone(),
-            updated_post.body.clone(),
-        ))
+        .set(NewPost::new_by_handler(updated_post))
         .get_result::<Post>(&mut connection)
 }
 
 pub fn update_by_slug(
     mut connection: DbConn,
     search_slug: &str,
-    updated_post: NewPostHandler,
+    updated_post: &NewPostHandler,
 ) -> Result<Post, Error> {
     diesel::update(posts.filter(slug.like(search_slug)))
-        .set(NewPost::new(
-            updated_post.title.clone(),
-            updated_post.body.clone(),
-        ))
+        .set(NewPost::new_by_handler(updated_post))
         .get_result::<Post>(&mut connection)
 }
 
