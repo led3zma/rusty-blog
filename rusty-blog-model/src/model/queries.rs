@@ -36,12 +36,28 @@ pub fn select_by_id(mut connection: DbConn, search_id: i32) -> Result<Vec<Post>,
     posts.filter(id.eq(search_id)).load::<Post>(&mut connection)
 }
 
+pub fn select_by_slug(mut connection: DbConn, search_slug: &str) -> Result<Vec<Post>, Error> {
+    posts
+        .filter(slug.like(search_slug))
+        .load::<Post>(&mut connection)
+}
+
 pub fn update(
     mut connection: DbConn,
     search_id: i32,
     updated_post: NewPost,
 ) -> Result<Post, Error> {
     diesel::update(posts.filter(id.eq(search_id)))
+        .set(updated_post)
+        .get_result::<Post>(&mut connection)
+}
+
+pub fn update_by_slug(
+    mut connection: DbConn,
+    search_slug: &str,
+    updated_post: NewPost,
+) -> Result<Post, Error> {
+    diesel::update(posts.filter(slug.like(search_slug)))
         .set(updated_post)
         .get_result::<Post>(&mut connection)
 }
