@@ -1,21 +1,36 @@
-mod model;
+pub mod model;
 
-use diesel::{prelude::*, PgConnection};
+use diesel::{
+    prelude::*,
+    r2d2::{self, ConnectionManager, Pool},
+    PgConnection,
+};
 use dotenvy::dotenv;
 use std::env;
 
 use crate::model::{models::*, queries};
 
-pub fn establish_connection() -> PgConnection {
+pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+fn establish_simple_connection() -> PgConnection {
     dotenv().ok();
+    PgConnection::establish(&env::var("DATABASE_URL").expect("DB URL NOT FOUND"))
+        .expect("COULD NOT ESTABLISH DB CONNECTION")
+}
 
-    let db_url = env::var("DATABASE_URL").expect("DB url not found");
+fn establish_connection() -> ConnectionManager<PgConnection> {
+    dotenv().ok();
+    ConnectionManager::<PgConnection>::new(env::var("DATABASE_URL").expect("DB URL NOT FOUND"))
+}
 
-    PgConnection::establish(&db_url).expect("DB connection err")
+pub fn get_db_pool() -> Pool<ConnectionManager<PgConnection>> {
+    Pool::builder()
+        .build(establish_connection())
+        .expect("DB Pool err")
 }
 
 pub fn full_example() {
-    let conn = &mut establish_connection();
+    let conn = &mut establish_simple_connection();
     let posts = queries::select_all(conn);
     println!("All posts: {:?}", posts);
 
