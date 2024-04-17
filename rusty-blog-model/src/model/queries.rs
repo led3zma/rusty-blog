@@ -5,21 +5,21 @@ use crate::model::{
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, PooledConnection},
+    result::Error,
 };
 
 use super::models::NewPostHandler;
 
 pub type DbConn = PooledConnection<ConnectionManager<PgConnection>>;
 
-pub fn create(mut connection: DbConn, new_post: &NewPostHandler) -> Post {
+pub fn create(mut connection: DbConn, new_post: &NewPostHandler) -> Result<Post, Error> {
     diesel::insert_into(posts::table)
         .values(NewPost::new(new_post.title.clone(), new_post.body.clone()))
         .get_result(&mut connection)
-        .expect("DB insert err")
 }
 
-pub fn select_all(mut connection: DbConn) -> Vec<Post> {
-    posts.load::<Post>(&mut connection).expect("DB query error")
+pub fn select_all(mut connection: DbConn) -> Result<Vec<Post>, Error> {
+    posts.load::<Post>(&mut connection)
 }
 
 pub fn select_one_post(connection: &mut PgConnection) -> Vec<Post> {
