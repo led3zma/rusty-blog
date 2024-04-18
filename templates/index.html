@@ -6,6 +6,12 @@
     <title>Test</title>
 </head>
 <body>
-    <h1>First Template</h1>
+    <h1>All Posts</h1>
+    {% for post in posts %}
+    <div>
+        <h2><a href="/blog/{{post.slug}}">{{post.title}}</a></h2>
+        <p>{{post.body | truncate(length=15)}}</p>
+    </div>
+    {% endfor %}
 </body>
 </html>
