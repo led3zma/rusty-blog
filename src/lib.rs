@@ -6,15 +6,18 @@ use diesel::{
     PgConnection,
 };
 use dotenvy::dotenv;
-use std::env;
+use std::{
+    env::{self, VarError},
+    error::Error,
+};
 
-fn establish_connection() -> ConnectionManager<PgConnection> {
+fn establish_connection() -> Result<ConnectionManager<PgConnection>, VarError> {
     dotenv().ok();
-    ConnectionManager::<PgConnection>::new(env::var("DATABASE_URL").expect("DB URL NOT FOUND"))
+    Ok(ConnectionManager::<PgConnection>::new(env::var(
+        "DATABASE_URL",
+    )?))
 }
 
-pub fn get_db_pool() -> Pool<ConnectionManager<PgConnection>> {
-    Pool::builder()
-        .build(establish_connection())
-        .expect("DB Pool err")
+pub fn get_db_pool() -> Result<Pool<ConnectionManager<PgConnection>>, Box<dyn Error>> {
+    Ok(Pool::builder().build(establish_connection().expect("err"))?)
 }

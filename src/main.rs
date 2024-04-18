@@ -1,3 +1,5 @@
+use std::process::exit;
+
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use tera::Tera;
 
@@ -6,9 +8,12 @@ use rusty_blog::get_db_pool;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    let pool = get_db_pool();
+    let pool = get_db_pool().unwrap_or_else(|err| {
+        eprintln!("Error en DB pool: {err}");
+        exit(1);
+    });
 
     HttpServer::new(move || {
         let tera =
