@@ -10,11 +10,20 @@ pub mod routes {
     pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
     #[get("/")]
-    pub async fn index(template: web::Data<tera::Tera>) -> impl Responder {
-        let ctx = tera::Context::new();
-        HttpResponse::Ok()
-            .content_type("text/html")
-            .body(template.render("index.html", &ctx).expect("Template Err"))
+    pub async fn index(pool: web::Data<DbPool>, template: web::Data<tera::Tera>) -> impl Responder {
+        let conn = pool.get().expect("DB get error");
+
+        match web::block(move || queries::select_all(conn)).await {
+            Ok(data) => {
+                let mut ctx = tera::Context::new();
+                ctx.insert("posts", &data.unwrap());
+
+                HttpResponse::Ok()
+                    .content_type("text/html")
+                    .body(template.render("index.html", &ctx).unwrap())
+            }
+            Err(err) => HttpResponse::NotFound().body(format!("No consiguió: \n{:?}", err)),
+        }
     }
 
     #[get("/posts")]
