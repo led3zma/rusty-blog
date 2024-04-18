@@ -26,6 +26,33 @@ pub mod routes {
         }
     }
 
+    #[get("/blog/{post_slug}")]
+    pub async fn get_post(
+        pool: web::Data<DbPool>,
+        template: web::Data<tera::Tera>,
+        post_slug: web::Path<String>,
+    ) -> impl Responder {
+        let conn = pool.get().expect("DB get error");
+
+        match web::block(move || queries::select_by_slug(conn, &post_slug.into_inner())).await {
+            Ok(data) => {
+                let data = data.unwrap();
+
+                if data.len() == 0 {
+                    return HttpResponse::NotFound().finish();
+                }
+
+                let mut ctx = tera::Context::new();
+                ctx.insert("post", &data[0]);
+
+                HttpResponse::Ok()
+                    .content_type("text/html")
+                    .body(template.render("posts.html", &ctx).unwrap())
+            }
+            Err(err) => HttpResponse::NotFound().body(format!("No consiguió: \n{:?}", err)),
+        }
+    }
+
     #[get("/posts")]
     pub async fn get_posts(pool: web::Data<DbPool>) -> impl Responder {
         let conn = pool.get().expect("DB get error");

@@ -22,6 +22,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::index)
             .service(routes::get_posts)
             .service(routes::new_post)
+            .service(routes::get_post)
             .wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(tera))
